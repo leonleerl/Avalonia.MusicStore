@@ -1,17 +1,22 @@
-﻿using System.Windows.Input;
+﻿using System.Reactive.Linq;
+using System.Windows.Input;
 using ReactiveUI;
 
 namespace Avalonia.MusicStore.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public ICommand BuyMusicCommand { get; }
-
     public MainWindowViewModel()
     {
-        BuyMusicCommand = ReactiveCommand.Create(() =>
+        ShowDialog = new Interaction<MusicStoreViewModel, AlbumViewModel?>();
+        BuyMusicCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            // 当按钮被点击时，这里的代码将被执行。
+            var store = new MusicStoreViewModel();
+            var result = await ShowDialog.Handle(store);
         });
     }
+
+    public ICommand BuyMusicCommand { get; }
+    public Interaction<MusicStoreViewModel, AlbumViewModel?> ShowDialog { get; }
+    
 }
