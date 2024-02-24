@@ -8,7 +8,7 @@ namespace Avalonia.MusicStore.ViewModels;
 public class AlbumViewModel : ViewModelBase
 {
     private readonly Album _album;
-    
+
     private Bitmap? _cover;
 
     public Bitmap? Cover
@@ -16,12 +16,28 @@ public class AlbumViewModel : ViewModelBase
         get => _cover;
         private set => this.RaiseAndSetIfChanged(ref _cover, value);
     }
-    
+
     public async Task LoadCover()
     {
-        await using (var imageStream = await _album.LoadCoverBitmapAsync())
+        // await using var imageStream = await _album.LoadCoverBitmapAsync();
+        // Cover = await Task.Run(() => Bitmap.DecodeToWidth(imageStream, 400));
+    }
+    
+    public async Task SaveToDiskAsync()
+    {
+        await _album.SaveAsync();
+
+        if (Cover != null)
         {
-            Cover = await Task.Run(() => Bitmap.DecodeToWidth(imageStream, 400));
+            var bitmap = Cover;
+
+            await Task.Run(() =>
+            {
+                using (var fs = _album.SaveCoverBitmapStream())
+                {
+                    bitmap.Save(fs);
+                }
+            });
         }
     }
 
